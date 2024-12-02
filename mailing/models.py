@@ -1,11 +1,13 @@
 from django.db import models
 from django.utils.timezone import now
+from users.models import User
 
 class Recipient(models.Model):
     """Модель получателя рассылки"""
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=100)
     comment = models.TextField(blank=True, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Создатель", related_name="recipient_owner", default=1)
 
     class Meta:
         verbose_name = 'Получатель'
@@ -19,6 +21,7 @@ class Message(models.Model):
     """Модель сообщения"""
     subject = models.CharField(max_length=255)
     body = models.TextField()
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Создатель", related_name="messages", default=1)
 
     class Meta:
         verbose_name = 'Сообщение'
@@ -36,6 +39,7 @@ class Mailing(models.Model):
         ('finished', 'Завершена'),
     ]
 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Создатель", related_name="mailing_created", default=1)
     send_time_start = models.DateTimeField(verbose_name="Дата и время начала отправки")
     send_time_end = models.DateTimeField(verbose_name="Дата и время окончания отправки")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='created', verbose_name="Статус")
