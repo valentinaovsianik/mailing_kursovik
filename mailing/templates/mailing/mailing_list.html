@@ -1,0 +1,23 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Список рассылок{% endblock %}
+{% block header %}Список рассылок{% endblock %}
+
+{% block content %}
+<div style="padding-left: 20px !important;">
+    <a href="{% url 'mailing:mailing_create' %}" class="btn btn-outline-success mb-3">Создать рассылку</a>
+    <ul class="list-group">
+        {% for mailing in mailings %}
+        <tr>
+            <td>{{ mailing.message.subject }}</td>
+            <td>{{ mailing.recipients.count }}</td>
+            <td>{{ mailing.get_status_display }}</td>
+            <td>
+                <a href="{% url 'mailing:mailing_update' mailing.id %}" class="btn btn-sm btn-warning">Изменить</a>
+                <a href="{% url 'mailing:mailing_delete' mailing.id %}" class="btn btn-sm btn-danger">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

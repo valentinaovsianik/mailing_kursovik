@@ -1,0 +1,19 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Попытки рассылки{% endblock %}
+{% block header %}Попытки рассылки{% endblock %}
+{% block content %}
+<div class="container mt-4">
+        <tbody>
+            {% for attempt in attempts %}
+            <tr>
+                <td>{{ attempt.mailing }}</td>
+                <td>{{ attempt.timestamp }}</td>
+                <td>{{ attempt.get_status_display }}</td>
+                <td>{{ attempt.server_response }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

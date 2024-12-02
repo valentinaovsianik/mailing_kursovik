@@ -4,6 +4,9 @@
         EasyMail
    </a>
    <nav class="header-nav" style="display: flex; align-items: center; gap: 10px; margin-left: -550px;">
+       <a class="btn btn-primary" href="{% url 'mailing:recipient_list' %}">Получатели</a>
+       <a class="btn btn-primary" href="{% url 'mailing:message_list' %}">Сообщения</a>
+       <a class="btn btn-primary" href="{% url 'mailing:mailing_list' %}">Рассылки</a>
        <a class="btn btn-primary" href="{% url 'mailing:about' %}">О нас</a>
        <a class="btn btn-primary" href="{% url 'mailing:contacts' %}">Контакты</a>
    </nav>
