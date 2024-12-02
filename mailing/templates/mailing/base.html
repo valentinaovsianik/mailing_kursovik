@@ -1,0 +1,31 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Сервис email-рассылок EasyMail {% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+
+    {% include 'mailing/includes/header.html' %}
+
+    <header>
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h1 class="display-4">{% block header %}EasyMail{% endblock %}</h1>
+        <p class="lead">{% block subheader %}Простой и удобный сервис email-рассылок{% endblock %}</p>
+        </div>
+
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "mailing/includes/footer.html" %}
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

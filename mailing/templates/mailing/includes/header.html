@@ -1,0 +1,16 @@
+{% load static %}
+<header class="header" style="display: flex; align-items: center; justify-content: space-between; padding: 10px;">
+   <a href="{% url 'mailing:index' %}" class="header-title" style="font-size: 24px; font-weight: bold; color: #333; text-decoration: none;">
+        EasyMail
+   </a>
+   <nav class="header-nav" style="display: flex; align-items: center; gap: 10px; margin-left: -550px;">
+       <a class="btn btn-primary" href="{% url 'mailing:about' %}">О нас</a>
+       <a class="btn btn-primary" href="{% url 'mailing:contacts' %}">Контакты</a>
+   </nav>
+   <div style="margin-left: 20px;">
+                {% csrf_token %}
+            </form>
+            <a class="p-2 btn btn-outline-primary">Войти</a>
+            <a class="p-2 btn btn-outline-primary">Зарегистрироваться</a>
+   </div>
+</header>
