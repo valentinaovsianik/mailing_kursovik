@@ -1,0 +1,15 @@
+{% extends "mailing/base.html" %}
+
+{% block content %}
+<h2>Ваш профиль</h2>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Телефон:</strong> {{ user.phone }}</p>
+<p><strong>Страна:</strong> {{ user.country }}</p>
+{% if user.avatar %}
+    <p><strong>Аватар:</strong></p>
+    <img src="{{ user.avatar.url }}" alt="Avatar" width="150">
+{% endif %}
+<a href="{% url 'users:profile_edit' %}">Редактировать профиль</a>
+<br>
+<a href="{% url 'users:logout' %}">Выйти</a>
+{% endblock %}
