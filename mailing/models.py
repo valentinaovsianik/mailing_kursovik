@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 from users.models import User
+from django.core.exceptions import PermissionDenied
 
 class Recipient(models.Model):
     """Модель получателя рассылки"""
@@ -12,6 +13,9 @@ class Recipient(models.Model):
     class Meta:
         verbose_name = 'Получатель'
         verbose_name_plural = 'Получатели'
+        permissions = [
+            ("view_all_recipients", "Может просматривать всех получателей"),
+        ]
 
     def __str__(self):
         return self.full_name
@@ -26,6 +30,9 @@ class Message(models.Model):
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
+        permissions = [
+            ("view_all_messages", "Может просматривать все сообщения"),
+        ]
 
     def __str__(self):
         return self.subject
@@ -49,6 +56,10 @@ class Mailing(models.Model):
     class Meta:
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
+        permissions = [
+            ("view_all_mailings", "Может просматривать все рассылки"),
+            ("disable_mailing", "Может отключать рассылки"),
+        ]
 
     def __str__(self):
         return f"Рассылка: {self.message.subject} ({self.get_status_display()})"
