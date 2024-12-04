@@ -7,6 +7,8 @@ from .forms import RecipientForm, MessageForm, MailingForm, MailingAttemptForm
 from mailing.services import process_mailing
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
 class ManagerRequiredMixin(UserPassesTestMixin):
@@ -26,9 +28,17 @@ class OwnerOrManagerMixin(UserPassesTestMixin):
 class AboutView(TemplateView):
     template_name = 'mailing/about.html'
 
+    @method_decorator(cache_page(60 * 15))  # Кэширование на 15 минут
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
 
 class ContactsView(TemplateView):
     template_name = 'mailing/contacts.html'
+
+    @method_decorator(cache_page(60 * 15))  # Кэширование на 15 минут
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 def index(request):
@@ -48,6 +58,8 @@ def index(request):
          'unique_recipients': unique_recipients,
      }
     return render(request, 'mailing/index.html', context)
+
+index = cache_page(60 * 5)(index) # Кэширование данных статистики на главной
 
 
 # Представления для модели Recipient
@@ -81,6 +93,11 @@ class RecipientListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['is_manager'] = self.request.user.groups.filter(name='Менеджер').exists()
         return context
+
+    # Кэширует список получателей для менеджеров на 5 минут
+    @method_decorator(cache_page(60 * 5))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class RecipientCreateView(LoginRequiredMixin, CreateView):
@@ -213,7 +230,12 @@ class MailingDetailView(DetailView):
 
         return context
 
+    # Кэширует статистику по рассылке на 10 минут
+    @method_decorator(cache_page(60 * 10))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
+@method_decorator(cache_page(60*15), name='dispatch') # Кэширует на 15 минут
 class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = 'mailing/mailing_list.html'
