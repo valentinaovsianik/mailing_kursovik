@@ -4,6 +4,16 @@
 {% block header %}Попытки рассылки{% endblock %}
 {% block content %}
 <div class="container mt-4">
+    {% if is_manager or mailing.owner == user %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Рассылка</th>
+                <th>Дата и время</th>
+                <th>Статус</th>
+                <th>Ответ сервера</th>
+            </tr>
+        </thead>
         <tbody>
             {% for attempt in attempts %}
             <tr>
@@ -15,5 +25,6 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 </div>
 {% endblock %}

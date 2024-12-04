@@ -287,12 +287,21 @@ class MailingAttemptListView(LoginRequiredMixin, ManagerRequiredMixin, ListView)
     template_name = 'mailing/mailing_attempt_list.html'
     context_object_name = 'attempts'
 
-    def get_queryset(self):
-        if self.request.user.groups.filter(name='Менеджер').exists():
-            return MailingAttempt.objects.all()
-        return MailingAttempt.objects.filter(mailing__owner=self.request.user)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_manager'] = self.request.user.groups.filter(name='Менеджер').exists()
+        user = self.request.user
+
+        context['is_manager'] = user.groups.filter(name='Менеджер').exists()
+        context['is_creator'] = user.groups.filter(name='Пользователь-создатель').exists()
+
         return context
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = MailingAttempt.objects.filter(mailing__owner=user)
+
+        mailing_id = self.kwargs.get('mailing_id')
+        if mailing_id:
+            queryset = queryset.filter(mailing_id=mailing_id)
+
+        return queryset
