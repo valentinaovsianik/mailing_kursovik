@@ -2,7 +2,7 @@
 
 {% block content %}
 <h2>Регистрация</h2>
-<form method="post">
+<form method="post" style="padding-left: 15px;">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Зарегистрироваться</button>
