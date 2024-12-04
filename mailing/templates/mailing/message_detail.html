@@ -1,0 +1,22 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Детали сообщения{% endblock %}
+{% block header %}Детали сообщения{% endblock %}
+{% block content %}
+<p style="padding-left: 20px !important;">
+<ul>
+    {% if message.owner == request.user %}
+    <h2>{{ message.subject }}</h2>
+    <p>{{ message.body }}</p>
+    <div class="mt-5">
+        <a href="{% url 'mailing:message_update' message.id %}">Редактировать</a>
+        <a href="{% url 'mailing:message_delete' message.id %}">Удалить</a>
+    </div>
+</ul>
+    <p></p>
+    {% else %}
+    <p>У вас нет доступа.</p>
+    {% endif %}
+    <a href="{% url 'mailing:message_list' %}">Назад к списку сообщений</a>
+</div>
+{% endblock %}

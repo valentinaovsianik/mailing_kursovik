@@ -1,15 +1,27 @@
 {% extends 'mailing/base.html' %}
 
+{% block title %}Список получателей{% endblock %}
+{% block header %}Получатели email-рассылок{% endblock %}
+{% block subheader %}Список получателей email-рассылок EasyMail{% endblock %}
 {% block content %}
-  <h2>Список получателей</h2>
-  <a href="{% url 'mailing:recipient_create' %}">Добавить получателя</a>
-  <ul>
-    {% for recipient in recipients %}
-      <li>
-        {{ recipient.full_name }} - {{ recipient.email }}
-        <a href="{% url 'mailing:recipient_update' recipient.pk %}">Изменить</a>
-        <a href="{% url 'mailing:recipient_delete' recipient.pk %}">Удалить</a>
-      </li>
-    {% endfor %}
-  </ul>
+<div style="padding-left: 20px !important;">
+        {% if is_manager %}
+        {% for recipient in recipients %}
+            <li class="list-group-item">
+                <a href="{% url 'mailing:recipient_detail' recipient.pk %}">{{ recipient.full_name }}</a> - {{ recipient.email }}
+            <span class="badge bg-info">Добавлен: {{ recipient.owner.email }}</span>
+            </li>
+        {% endfor %}
+        {% else %}
+            <a href="{% url 'mailing:recipient_create' %}" class="btn btn-outline-success mb-3">Добавить получателя</a>
+            <ul>
+            {% for recipient in recipients %}
+                <li>
+                    <a href="{% url 'mailing:recipient_detail' recipient.pk %}">{{ recipient.full_name }}</a> - {{ recipient.email }}
+                </li>
+            {% endfor %}
+            </ul>
+      {% endif %}
+
+</div>
 {% endblock %}

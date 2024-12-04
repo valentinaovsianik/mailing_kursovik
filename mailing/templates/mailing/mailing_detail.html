@@ -1,0 +1,49 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}{{ message.subject }}{% endblock %}
+{% block header %}Детали рассылки{% endblock %}
+
+{% block content %}
+<div class="mailing-detail">
+<ul>
+    <h2>{{ mailing.message.subject }}</h2>
+    <p><strong>Отправитель:</strong> {{ mailing.owner }}</p>
+    <p><strong>Получатели:</strong> {{ mailing.recipients.all|join:", " }}</p>
+    <p><strong>Дата начала:</strong> {{ mailing.send_time_start|date:"d-m-Y H:i" }}</p>
+    <p><strong>Дата окончания:</strong> {{ mailing.send_time_end|date:"d-m-Y H:i" }}</p>
+    <p><strong>Статус:</strong> {{ mailing.get_status_display }}</p>
+<p></p>
+    {% if is_manager or mailing.owner == user %}
+        <h3>Статистика рассылок {{ mailing.owner }}</h3>
+        <p><strong>Успешные попытки:</strong> {{ successful_attempts }}</p>
+        <p><strong>Неуспешные попытки:</strong> {{ failed_attempts }}</p>
+    <p><strong>Всего попыток: {{ total_messages_sent }}</p>
+<p></p>
+        <h4>Информация о рассылке</h4>
+        <ul>
+            {% for attempt in attempts %}
+                <li>
+                    <strong>Дата:</strong> {{ attempt.timestamp|date:"d-m-Y H:i" }} |
+                    <strong>Статус:</strong> {{ attempt.status|default:"Неизвестно" }} |
+                </li>
+            {% empty %}
+                <li>Попыток рассылки пока нет.</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У вас нет доступа к статистике этой рассылки.</p>
+    {% endif %}
+<p></p>
+    {% if is_manager or mailing.owner == user %}
+        <form method="POST" action="{% url 'mailing:mailing_send' pk=mailing.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Запустить рассылку</button>
+        </form>
+    {% endif %}
+    <br><br>
+    <ul>
+        <a href="{% url 'mailing:mailing_list' %}" class="btn btn-outline-primary">Вернуться к списку рассылок</a>
+    </ul>
+<ul>
+</div>
+{% endblock %}

@@ -6,8 +6,8 @@
 {% block content %}
 <div style="margin-left: 20px;">
 <h2>Статистика рассылок EasyMail:</h2>
-<p>Всего рассылок: </p>
-<p>Активных рассылок: </p>
-<p>Уникальных получателей: </p>
+<p>Всего рассылок: {{ total_mailings }}</p>
+<p>Активных рассылок: {{ active_mailings }}</p>
+<p>Уникальных получателей: {{ unique_recipients }}</p>
 </div>
 {% endblock %}

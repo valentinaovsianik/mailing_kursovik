@@ -4,8 +4,7 @@
 {% block header %}Сообщения{% endblock %}
 {% block content %}
 <div style="padding-left: 20px !important;">
-    <a href="{% url 'mailing:message_create' %}" class="btn btn-outline-success mb-3">Добавить сообщение</a>
-
+    {% if is_manager %}
     <h2>Список сообщений</h2>
     <ul>
         {% for message in messages %}
@@ -13,6 +12,17 @@
                 <a href="{% url 'mailing:message_detail' message.id %}">{{ message.subject }}</a>
             </li>
         {% endfor %}
+     </ul>
+    {% else %}
+        <a href="{% url 'mailing:message_create' %}" class="btn btn-outline-success mb-3">Добавить сообщение</a>
+        <h2>Список сообщений</h2>
+        <ul>
+        {% for message in messages %}
+            <li>
+                <a href="{% url 'mailing:message_detail' message.id %}">{{ message.subject }}</a>
+            </li>
+        {% endfor %}
     </ul>
+    {% endif %}
 </div>
 {% endblock %}
