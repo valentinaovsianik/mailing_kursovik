@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
@@ -12,9 +11,9 @@ from .models import User
 
 
 class RegisterView(FormView):
-    template_name = 'users/register.html'
+    template_name = "users/register.html"
     form_class = UserRegistrationForm
-    success_url = reverse_lazy('mailing:index')
+    success_url = reverse_lazy("mailing:index")
 
     def form_valid(self, form):
         user = form.save()
@@ -23,8 +22,8 @@ class RegisterView(FormView):
 
         # Отправка приветственного письма
         send_mail(
-            subject='Добро пожаловать!',
-            message='Спасибо за регистрацию! Добро пожаловать в наш сервис!',
+            subject="Добро пожаловать!",
+            message="Спасибо за регистрацию! Добро пожаловать в наш сервис!",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,
@@ -35,19 +34,19 @@ class RegisterView(FormView):
 
 class UserLoginView(LoginView):
     authentication_form = UserLoginForm
-    template_name = 'users/login.html'
-    success_url = reverse_lazy('mailing:index')
+    template_name = "users/login.html"
+    success_url = reverse_lazy("mailing:index")
 
 
 class UserLogoutView(LogoutView):
-    next_page = reverse_lazy('mailing:index')
+    next_page = reverse_lazy("mailing:index")
 
 
 class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = UserProfileForm
-    template_name = 'users/profile_edit.html'
-    success_url = reverse_lazy('users:profile')
+    template_name = "users/profile_edit.html"
+    success_url = reverse_lazy("users:profile")
 
     def get_object(self, queryset=None):
         return self.request.user  # Пользователь может изменять только свой профиль
@@ -55,7 +54,7 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 class UserProfileView(LoginRequiredMixin, DetailView):
     model = User
-    template_name = 'users/profile.html'
+    template_name = "users/profile.html"
 
     def get_object(self):
         return self.request.user

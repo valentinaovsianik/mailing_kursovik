@@ -1,15 +1,17 @@
 from django.core.management.base import BaseCommand
+
 from mailing.models import Mailing
 from mailing.services import process_mailing
+
 
 class Command(BaseCommand):
     """Отправка рассылки вручную."""
 
     def add_arguments(self, parser):
-        parser.add_argument('mailing_id', type=int, help='ID рассылки')
+        parser.add_argument("mailing_id", type=int, help="ID рассылки")
 
     def handle(self, *args, **options):
-        mailing_id = options['mailing_id']
+        mailing_id = options["mailing_id"]
         try:
             mailing = Mailing.objects.get(id=mailing_id)
             process_mailing(mailing)

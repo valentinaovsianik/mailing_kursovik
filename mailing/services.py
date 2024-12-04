@@ -1,7 +1,8 @@
-from django.core.mail import send_mail
-from .models import MailingAttempt
-from django.utils.timezone import now
 from django.conf import settings
+from django.core.mail import send_mail
+from django.utils.timezone import now
+
+from .models import MailingAttempt
 
 
 def process_mailing(mailing):
@@ -23,7 +24,7 @@ def process_mailing(mailing):
             MailingAttempt.objects.create(
                 mailing=mailing,
                 timestamp=now(),
-                status='success',
+                status="success",
                 server_response="Сообщение успешно отправлено.",
             )
         except Exception as e:
@@ -31,7 +32,7 @@ def process_mailing(mailing):
             MailingAttempt.objects.create(
                 mailing=mailing,
                 timestamp=now(),
-                status='failed',
+                status="failed",
                 server_response=str(e),
             )
     # Обновляем статус рассылки

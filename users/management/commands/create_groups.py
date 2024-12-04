@@ -1,8 +1,10 @@
-from django.core.management import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from mailing.models import Recipient, Message, Mailing
+from django.core.management import BaseCommand
+
+from mailing.models import Mailing, Recipient
 from users.models import User
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -34,7 +36,9 @@ class Command(BaseCommand):
 
         # Назначение разрешений для Менеджера
         manager_permissions = [
-            Permission.objects.get(codename="view_recipient", content_type=ContentType.objects.get_for_model(Recipient)),
+            Permission.objects.get(
+                codename="view_recipient", content_type=ContentType.objects.get_for_model(Recipient)
+            ),
             Permission.objects.get(codename="view_mailing", content_type=ContentType.objects.get_for_model(Mailing)),
             Permission.objects.get(codename="view_user", content_type=ContentType.objects.get_for_model(User)),
             Permission.objects.get(codename="change_user", content_type=ContentType.objects.get_for_model(User)),
