@@ -1,13 +1,18 @@
 {% extends 'mailing/base.html' %}
 
 {% block title %}Попытки рассылки{% endblock %}
-{% block header %}Попытки рассылки{% endblock %}
+{% block header %}Попытки рассылки {% endblock %}
 {% block content %}
 <div class="container mt-4">
-    {% if is_manager or mailing.owner == user %}
+    {% if is_manager %}
+    <p class="text-success">Вы видите все попытки рассылок.</p>
+    {% else %}
+    <p class="text-info">Вы видите только свои попытки рассылок.</p>
+    {% endif %}
     <table class="table">
         <thead>
             <tr>
+                <th>#</th>
                 <th>Рассылка</th>
                 <th>Дата и время</th>
                 <th>Статус</th>
@@ -15,16 +20,24 @@
             </tr>
         </thead>
         <tbody>
+            {% with request.user as user %}
             {% for attempt in attempts %}
+                {% if attempt.mailing.owner == user or is_manager %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ attempt.mailing }}</td>
+                    <td>{{ attempt.timestamp|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ attempt.get_status_display }}</td>
+                    <td>{{ attempt.server_response }}</td>
+                </tr>
+                {% endif %}
+            {% empty %}
             <tr>
-                <td>{{ attempt.mailing }}</td>
-                <td>{{ attempt.timestamp }}</td>
-                <td>{{ attempt.get_status_display }}</td>
-                <td>{{ attempt.server_response }}</td>
+                <td colspan="5" class="text-center">Нет попыток для отображения.</td>
             </tr>
             {% endfor %}
+            {% endwith %}
         </tbody>
     </table>
-    {% endif %}
 </div>
 {% endblock %}

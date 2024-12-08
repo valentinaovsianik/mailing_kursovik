@@ -2,16 +2,19 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.decorators import permission_required
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView, View
+
 
 from mailing.services import process_mailing
 
 from .forms import MailingForm, MessageForm, RecipientForm
 from .models import Mailing, MailingAttempt, Message, Recipient
+from django.db.models import Count, Q
 
 
 class ManagerRequiredMixin(UserPassesTestMixin):
@@ -42,7 +45,8 @@ class AboutView(TemplateView):
 class ContactsView(TemplateView):
     template_name = "mailing/contacts.html"
 
-    @method_decorator(cache_page(60 * 15))  # Кэширование на 15 минут
+     # Кэширование на 15 минут
+    @method_decorator(cache_page(60 * 15))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
@@ -248,7 +252,7 @@ class MailingDetailView(DetailView):
         return super().dispatch(*args, **kwargs)
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")  # Кэширует на 15 минут
+@method_decorator(cache_page(60 * 5), name="dispatch")  # Кэширует на 5 минут
 class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = "mailing/mailing_list.html"
@@ -262,6 +266,10 @@ class MailingListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["is_manager"] = self.request.user.groups.filter(name="Менеджер").exists()
+        # Передаем данные о количестве активных рассылок
+        context["active_mailings_count"] = Mailing.objects.filter(is_active=True).count()
+        # Передаем данные о количестве завершенных рассылок (по статусу)
+        context["finished_mailings_count"] = Mailing.objects.filter(status="finished").count()
         return context
 
 
@@ -320,27 +328,87 @@ class MailingSendView(LoginRequiredMixin, View):
         return HttpResponseRedirect(reverse("mailing:mailing_list"))
 
 
+class MailingDisableView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        if not request.user.groups.filter(name="Менеджер").exists():
+            return HttpResponseForbidden("Вы не имеете права отключать рассылки.")
+
+        # Если пользователь менеджер, выполняем отключение рассылки
+        mailing = Mailing.objects.get(pk=pk)
+        if mailing.is_active:
+            mailing.is_active = False
+            mailing.save()
+        return HttpResponseRedirect(reverse("mailing:mailing_list"))
+
+
 # Представления для модели MailingAttempt
-class MailingAttemptListView(LoginRequiredMixin, ManagerRequiredMixin, ListView):
+class MailingAttemptListView(LoginRequiredMixin, ListView):
     model = MailingAttempt
     template_name = "mailing/mailing_attempt_list.html"
     context_object_name = "attempts"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
 
-        context["is_manager"] = user.groups.filter(name="Менеджер").exists()
-        context["is_creator"] = user.groups.filter(name="Пользователь-создатель").exists()
-
+        context["is_manager"] = self.request.user.groups.filter(name="Менеджер").exists()
         return context
+
 
     def get_queryset(self):
         user = self.request.user
-        queryset = MailingAttempt.objects.filter(mailing__owner=user)
+        # Менеджер видит все попытки, пользователь только свои
+        if user.groups.filter(name="Менеджер").exists():
+            queryset = MailingAttempt.objects.all()
+        else:
+            queryset = MailingAttempt.objects.filter(mailing__owner=user)
 
         mailing_id = self.kwargs.get("mailing_id")
         if mailing_id:
             queryset = queryset.filter(mailing_id=mailing_id)
 
         return queryset
+
+
+@permission_required("mailing.disable_mailing")
+def toggle_mailing_status(request, mailing_id): # Отключение рассылки
+    mailing = get_object_or_404(Mailing, pk=mailing_id)
+    mailing.is_active = not mailing.is_active
+    mailing.save()
+    return redirect("mailing: mailing_list")  # Перенаправление на список рассылок
+
+
+# Представление для статистики по пользователю
+class UserMailingStatsView(TemplateView):
+    template_name = "mailing/mailing_stats.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Получаем параметры из GET-запроса
+        start_date = self.request.GET.get("start_date")
+        end_date = self.request.GET.get("end_date")
+
+        # Фильтруем по пользователю и дате
+        mailings = Mailing.objects.filter(owner=user)
+        if start_date:
+            mailings = mailings.filter(send_time_start__date__gte=start_date)
+        if end_date:
+            mailings = mailings.filter(send_time_start__date__lte=end_date)
+
+        # Подсчёты
+        mailings = mailings.annotate(
+            total_attempts=Count("attempts"),
+            successful_attempts=Count("attempts", filter=Q(attempts__status="success")),
+            failed_attempts=Count("attempts", filter=Q(attempts__status="failed")),
+        )
+
+        # Итоговые данные
+        context.update({
+            "total_mailings": mailings.count(),
+            "total_attempts": sum(mailing.total_attempts for mailing in mailings),
+            "successful_attempts": sum(mailing.successful_attempts for mailing in mailings),
+            "failed_attempts": sum(mailing.failed_attempts for mailing in mailings),
+            "user_mailings": mailings,
+        })
+        return context
