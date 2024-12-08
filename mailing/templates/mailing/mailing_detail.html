@@ -14,11 +14,6 @@
     <p><strong>Статус:</strong> {{ mailing.get_status_display }}</p>
 <p></p>
     {% if is_manager or mailing.owner == user %}
-        <h3>Статистика рассылок {{ mailing.owner }}</h3>
-        <p><strong>Успешные попытки:</strong> {{ successful_attempts }}</p>
-        <p><strong>Неуспешные попытки:</strong> {{ failed_attempts }}</p>
-    <p><strong>Всего попыток: {{ total_messages_sent }}</p>
-<p></p>
         <h4>Информация о рассылке</h4>
         <ul>
             {% for attempt in attempts %}
@@ -34,7 +29,7 @@
         <p>У вас нет доступа к статистике этой рассылки.</p>
     {% endif %}
 <p></p>
-    {% if is_manager or mailing.owner == user %}
+    {% if mailing.owner == user %}
         <form method="POST" action="{% url 'mailing:mailing_send' pk=mailing.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">Запустить рассылку</button>
