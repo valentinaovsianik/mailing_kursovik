@@ -244,13 +244,13 @@ class MailingDetailView(DetailView):
 
         return context
 
-    # Кэширует статистику по рассылке на 10 минут
-    @method_decorator(cache_page(60 * 10))
+    # Кэширует статистику по рассылке на 2 минуты
+    @method_decorator(cache_page(60 * 2))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
 
-@method_decorator(cache_page(60 * 5), name="dispatch")  # Кэширует на 5 минут
+@method_decorator(cache_page(60 * 2), name="dispatch")  # Кэширует на 2 минуты
 class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = "mailing/mailing_list.html"
