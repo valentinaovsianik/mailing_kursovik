@@ -62,6 +62,7 @@ class Mailing(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="created", verbose_name="Статус")
     message = models.ForeignKey("Message", on_delete=models.CASCADE, verbose_name="Сообщение")
     recipients = models.ManyToManyField("Recipient", verbose_name="Получатели")
+    is_active = models.BooleanField(default=True, verbose_name="Активна")
 
     class Meta:
         verbose_name = "Рассылка"
@@ -76,6 +77,10 @@ class Mailing(models.Model):
 
     def update_status(self):
         """Обновляет статус рассылки"""
+
+        if not self.is_active:
+            return  # Не обновляем статус, если рассылка заблокирована
+
         current_time = now()
         if self.status == "created" and current_time >= self.send_time_start:
             self.status = "started"
