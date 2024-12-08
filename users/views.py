@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, UpdateView
 
@@ -25,7 +26,6 @@ class RegisterView(FormView):
         self.send_registration_email(user)
 
         return super().form_valid(form)
-
 
     def send_registration_email(self, user):
         subject = "Подтверждение регистрации"

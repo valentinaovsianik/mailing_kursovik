@@ -2,9 +2,10 @@ from django.urls import path
 
 from . import views
 from .views import (AboutView, ContactsView, MailingAttemptListView, MailingCreateView, MailingDeleteView,
-                    MailingDetailView, MailingListView, MailingSendView, MailingUpdateView, MessageCreateView,
-                    MessageDeleteView, MessageDetailView, MessageListView, MessageUpdateView, RecipientCreateView,
-                    RecipientDeleteView, RecipientDetailView, RecipientListView, RecipientUpdateView, MailingDisableView, UserMailingStatsView)
+                    MailingDetailView, MailingDisableView, MailingListView, MailingSendView, MailingUpdateView,
+                    MessageCreateView, MessageDeleteView, MessageDetailView, MessageListView, MessageUpdateView,
+                    RecipientCreateView, RecipientDeleteView, RecipientDetailView, RecipientListView,
+                    RecipientUpdateView, UserMailingStatsView)
 
 app_name = "mailing"
 
@@ -29,6 +30,6 @@ urlpatterns = [
     path("mailings/<int:pk>/delete/", MailingDeleteView.as_view(), name="mailing_delete"),
     path("mailing/<int:pk>/send/", MailingSendView.as_view(), name="mailing_send"),
     path("attempts/", MailingAttemptListView.as_view(), name="mailing_attempt_list"),
-    path("<int:pk>/disable/", MailingDisableView.as_view(), name='mailing_disable'),
+    path("<int:pk>/disable/", MailingDisableView.as_view(), name="mailing_disable"),
     path("stats/", UserMailingStatsView.as_view(), name="mailing_stats"),
 ]

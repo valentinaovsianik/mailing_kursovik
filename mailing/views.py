@@ -1,20 +1,18 @@
 from django.contrib import messages
-from django.http import JsonResponse
+from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
+from django.db.models import Count, Q
+from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.contrib.auth.decorators import permission_required
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView, View
-
 
 from mailing.services import process_mailing
 
 from .forms import MailingForm, MessageForm, RecipientForm
 from .models import Mailing, MailingAttempt, Message, Recipient
-from django.db.models import Count, Q
 
 
 class ManagerRequiredMixin(UserPassesTestMixin):
@@ -45,7 +43,7 @@ class AboutView(TemplateView):
 class ContactsView(TemplateView):
     template_name = "mailing/contacts.html"
 
-     # Кэширование на 15 минут
+    # Кэширование на 15 минут
     @method_decorator(cache_page(60 * 15))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
@@ -353,7 +351,6 @@ class MailingAttemptListView(LoginRequiredMixin, ListView):
         context["is_manager"] = self.request.user.groups.filter(name="Менеджер").exists()
         return context
 
-
     def get_queryset(self):
         user = self.request.user
         # Менеджер видит все попытки, пользователь только свои
@@ -370,7 +367,7 @@ class MailingAttemptListView(LoginRequiredMixin, ListView):
 
 
 @permission_required("mailing.disable_mailing")
-def toggle_mailing_status(request, mailing_id): # Отключение рассылки
+def toggle_mailing_status(request, mailing_id):  # Отключение рассылки
     mailing = get_object_or_404(Mailing, pk=mailing_id)
     mailing.is_active = not mailing.is_active
     mailing.save()
@@ -404,11 +401,13 @@ class UserMailingStatsView(TemplateView):
         )
 
         # Итоговые данные
-        context.update({
-            "total_mailings": mailings.count(),
-            "total_attempts": sum(mailing.total_attempts for mailing in mailings),
-            "successful_attempts": sum(mailing.successful_attempts for mailing in mailings),
-            "failed_attempts": sum(mailing.failed_attempts for mailing in mailings),
-            "user_mailings": mailings,
-        })
+        context.update(
+            {
+                "total_mailings": mailings.count(),
+                "total_attempts": sum(mailing.total_attempts for mailing in mailings),
+                "successful_attempts": sum(mailing.successful_attempts for mailing in mailings),
+                "failed_attempts": sum(mailing.failed_attempts for mailing in mailings),
+                "user_mailings": mailings,
+            }
+        )
         return context
