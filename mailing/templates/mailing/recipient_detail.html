@@ -1,0 +1,22 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}{{ recipient.full_name }}{% endblock %}
+{% block header %}Сведения о получателе{% endblock %}
+{% block subheader %}Информация о получателе {{ recipient.full_name }}{% endblock %}
+
+{% block content %}
+<div style="padding-left: 20px !important;">
+    {% if is_manager or recipient.owner == user %}
+        <h2>Полное имя: {{ recipient.full_name }}</h2>
+        <p><strong>Email:</strong> {{ recipient.email }}</p>
+        <p><strong>Комментарий:</strong> {{ recipient.comment|default:"Нет комментария" }}</p>
+    {% endif %}
+    <div class="mt-5">
+    {% if recipient.owner == user %}
+        <a href="{% url 'mailing:recipient_update' recipient.pk %}">Редактировать</a>
+        <a href="{% url 'mailing:recipient_delete' recipient.pk %}">Удалить</a>
+    {% endif %}
+        <a href="{% url 'mailing:recipient_list' %}">Вернуться к списку</a>
+    <div/>
+</div>
+{% endblock %}
