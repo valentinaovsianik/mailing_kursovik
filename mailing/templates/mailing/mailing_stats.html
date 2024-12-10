@@ -1,0 +1,57 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Статистика рассылок{% endblock %}
+{% block header %}Статистика рассылок{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Статистика рассылок для пользователя: {{ request.user.email }}</h2>
+    <form method="get" class="row mb-4">
+        <div class="col-md-4">
+            <label for="start_date" class="form-label">С:</label>
+            <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date }}">
+        </div>
+        <div class="col-md-4">
+            <label for="end_date" class="form-label">По:</label>
+            <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date }}">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Применить фильтр</button>
+        </div>
+    </form>
+
+    <!-- Общая статистика -->
+    <ul>
+        <li>Общее количество рассылок: {{ total_mailings }}</li>
+        <li>Общее количество попыток: {{ total_attempts }}</li>
+        <li>Успешные попытки: {{ successful_attempts }}</li>
+        <li>Неуспешные попытки: {{ failed_attempts }}</li>
+    </ul>
+
+    <!-- Список рассылок -->
+    <h3>Список рассылок</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Название рассылки</th>
+                <th>Дата создания</th>
+                <th>Активна</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mailing in user_mailings %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ mailing.message.subject }}</td>
+                <td>{{ mailing.send_time_start }}</td>
+                <td>{{ mailing.is_active|yesno:"Да,Нет" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">Нет доступных рассылок.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

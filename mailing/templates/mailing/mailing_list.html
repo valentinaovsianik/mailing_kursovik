@@ -1,0 +1,44 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Список рассылок{% endblock %}
+{% block header %}Рассылки{% endblock %}
+
+{% block content %}
+<div style="padding-left: 20px !important;">
+    <h2>Список рассылок</h2>
+
+    {% if is_manager %}
+        <p>Активных рассылок: {{ active_mailings_count }}</p>
+        <p>Завершенных рассылок: {{ finished_mailings_count }}</p>
+        <ul>
+        {% for mailing in mailings %}
+            <li>
+                <a href="{% url 'mailing:mailing_detail' mailing.id %}">{{ mailing }}</a>
+                {% if mailing.is_active %}
+                    <form action="{% url 'mailing:mailing_disable' pk=mailing.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Отключить</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <a href="{% url 'mailing:mailing_create' %}" class="btn btn-outline-success mb-3">Создать рассылку</a>
+        <ul>
+        {% for mailing in mailings %}
+            <li>
+                <td><a href="{% url 'mailing:mailing_detail' mailing.id %}">{{ mailing.message.subject }}</a></td>
+                <td>{{ mailing.recipients.count }}</td>
+                <td>{{ mailing.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'mailing:mailing_update' mailing.id %}">Изменить</a>
+                    <a href="{% url 'mailing:mailing_delete' mailing.id %}">Удалить</a>
+                </td>
+            </td>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
